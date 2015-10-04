@@ -21,11 +21,29 @@ public class PlayerCharacter : MonoBehaviour {
 	private float journeyLength;
 	private Vector3 targetTrack;
 
+	//-----------------
+	// Character stats
+	//-----------------
+	private int level = 0;
+	private int experiencePoints = 0;
+	private int healthPoints = 0;
+	private int magicPoints = 0;
+	private int damage = 0;
+	private int dodgeSpeed = 0;
+	private int critChance = 0;
+
+	//---------------------
+	// Character intentory
+	//---------------------
+	private int gold = 0;
+
+
+
 	// Use this for initialization
 	void Start () {
 		if(playerCharacter == null) {
 			playerCharacter = GameObject.FindWithTag("Player");
-		}	// end if
+		} // end if
 
 	} // end Start()
 	
@@ -64,7 +82,7 @@ public class PlayerCharacter : MonoBehaviour {
 
 					targetTrack = middleTrackVector;
 					currentTrack = middleTrackLocation;
-				}   // end if/else block
+				} // end if/else block
 
 				journeyLength = Vector3.Distance(playerCharacter.transform.position, targetTrack);
 
@@ -72,8 +90,9 @@ public class PlayerCharacter : MonoBehaviour {
 			} else {
 				Debug.Log("Player is on the bottom most track");
 			}  // end if/else
-		}   // end if
+		} // end if
 
+		// If the player is moving
 		if (playerMoving) {
 			float distCovered = (Time.time - startTime) * speed;
 			float fracJourney = distCovered / journeyLength;
@@ -84,9 +103,44 @@ public class PlayerCharacter : MonoBehaviour {
 				playerMoving = false;
 			} // end if/else
 			
+		}  // end if
+
+		if (experiencePoints >= 100) {
+			experiencePoints %= 100;
+
+			LevelUp();
 		} // end if
 
-	} // end Update()
+	}  // end Update()
 
 
-}
+	// Fires when we collide with something
+	void OnTriggerEnter2D(Collider2D coll) {
+
+		// If we hit an enemy
+		if(coll.gameObject.tag == "Enemy") {
+			// Grab the enemy script
+			Enemy enemyScript = coll.gameObject.GetComponent<Enemy>();
+
+			// Add their dropped experience and gold to ours
+			this.experiencePoints += enemyScript.experiencePointsToGive;
+			this.gold += enemyScript.goldToGive;
+
+			Debug.Log("Experience: " + experiencePoints);
+			Debug.Log("Gold: " + gold);
+
+			Destroy(coll.gameObject);
+		} // end if
+
+	} // end OnTriggerEnter2D()
+
+
+	// When we level up!
+	void LevelUp() {
+		this.level++;
+
+		Debug.Log("Level up! Now level: " + this.level);
+	} // end LevelUp()
+
+
+} // end class
